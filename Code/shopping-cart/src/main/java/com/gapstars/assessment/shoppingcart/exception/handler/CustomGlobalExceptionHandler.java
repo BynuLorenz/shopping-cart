@@ -1,6 +1,7 @@
 
 package com.gapstars.assessment.shoppingcart.exception.handler;
 
+import com.gapstars.assessment.shoppingcart.common.enums.ResponseCode;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.Response;
 import com.gapstars.assessment.shoppingcart.exception.BaseException;
 import com.gapstars.assessment.shoppingcart.exception.CartNotFoundException;
@@ -29,7 +30,7 @@ public class CustomGlobalExceptionHandler  {
 
     String msg = ex.getErrorMsg();
     Response response = new Response();
-    response.setResponseCode( "01" );
+    response.setResponseCode( ResponseCode.FAIL.getCode() );
     response.setResponseMsg( msg );
     log.error( "BaseException {}", ex.getMessage() );
     return new ResponseEntity<>( response, HttpStatus.OK );
@@ -45,7 +46,7 @@ public class CustomGlobalExceptionHandler  {
 
     String msg = ex.getErrorMsg();
     Response response = new Response();
-    response.setResponseCode("01");
+    response.setResponseCode( ResponseCode.FAIL.getCode() );
     response.setResponseMsg(msg);
     log.error("CustomerNotFoundException {}", ex.getMessage());
     return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
@@ -61,7 +62,7 @@ public class CustomGlobalExceptionHandler  {
 
     String msg = ex.getErrorMsg();
     Response response = new Response();
-    response.setResponseCode("01");
+    response.setResponseCode( ResponseCode.FAIL.getCode() );
     response.setResponseMsg(msg);
     log.error("ProductNotFoundException {}", ex.getMessage());
     return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
@@ -77,7 +78,7 @@ public class CustomGlobalExceptionHandler  {
 
     String msg = ex.getErrorMsg();
     Response response = new Response();
-    response.setResponseCode("01");
+    response.setResponseCode( ResponseCode.FAIL.getCode() );
     response.setResponseMsg(msg);
     log.error("CartNotFoundException {}", ex.getMessage());
     return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
@@ -96,7 +97,7 @@ public class CustomGlobalExceptionHandler  {
         .collect(Collectors.joining(", "));
 
     Response response = new Response();
-    response.setResponseCode("01");
+    response.setResponseCode( ResponseCode.FAIL.getCode() );
     response.setResponseMsg(joinedErrors);
     log.error("MethodArgumentNotValidException {}", joinedErrors);
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

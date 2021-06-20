@@ -14,8 +14,11 @@ import com.gapstars.assessment.shoppingcart.controller.payload.response.Response
 import com.gapstars.assessment.shoppingcart.service.CustomerService;
 import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +42,7 @@ public class CustomerController {
    * @param request Request Class
    * @return CustomerResponse Response
    */
-  @PostMapping(WsPath.CREATE_CUSTOMER)
+  @PostMapping
   public CustomerResponse createCustomer(@Valid @RequestBody CustomerRequest request ) {
 
     log.info( "Received createCustomer() request. Request : {}", request);
@@ -52,12 +55,25 @@ public class CustomerController {
   }
 
   /**
+   * Get all Customers
+   * @return List of Customer Response List
+   */
+  @GetMapping
+  public List<CustomerResponse> getAllCustomers() {
+
+    log.info( "Received getAllCustomers() request.");
+    List<CustomerResponse> responses = customerService.getAllCustomers();
+    log.info( "Executed getAllCustomers() request. Response : {}", responses);
+    return responses;
+  }
+
+  /**
    * Handles addition of products to the Customer
    * @param request Request Class
    * @return CustomerResponse Response Class
    */
   @PostMapping(WsPath.ADD_PRODUCTS)
-  public AddProductsResponse addProductsToCart( @RequestBody AddProductsRequest request ) {
+  public AddProductsResponse addProductsToCart( @Valid @RequestBody AddProductsRequest request ) {
 
     log.info( "Received addProductsToCart() request. Request : {}", request);
     List<ProductDto> dtoList = helper.toDtos( request );
@@ -74,7 +90,7 @@ public class CustomerController {
    * @return CartAmountResponse
    */
   @PatchMapping(WsPath.UPDATE_AMOUNTS)
-  public Response updateCartAmounts( @RequestBody Long cartId ) {
+  public Response updateCartAmounts( @Valid @RequestBody @NotNull Long cartId ) {
 
     log.info( "Received updateCartAmounts() request. Id : {}", cartId);
     CartAmountResponse response = customerService.calculateCartAmounts( cartId );

@@ -2,13 +2,14 @@ package com.gapstars.assessment.shoppingcart.controller.helper;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
-import com.gapstars.assessment.shoppingcart.common.enums.ProductName;
+import com.gapstars.assessment.shoppingcart.common.enums.ResponseCode;
 import com.gapstars.assessment.shoppingcart.controller.payload.request.AddProductsRequest;
 import com.gapstars.assessment.shoppingcart.controller.payload.request.CustomerRequest;
+import com.gapstars.assessment.shoppingcart.controller.payload.request.ProductRequest;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.AddProductsResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CartAmountResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CustomerResponse;
-import com.gapstars.assessment.shoppingcart.controller.payload.response.Response;
+import com.gapstars.assessment.shoppingcart.controller.payload.response.ProductResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -42,15 +43,9 @@ public class ControllerHelper {
    */
   public List<ProductDto> toDtos ( AddProductsRequest request ) {
 
-    List<ProductDto> dtoList = request.getProductNames().stream().map( name -> {
+    List<ProductDto> dtoList = request.getProductIds().stream().map( id -> {
       ProductDto dto = new ProductDto();
-
-      try {
-        dto.setProductName( ProductName.valueOf(name) );
-      } catch ( IllegalArgumentException ex ) {
-        log.error("Product not available - {}", name);
-      }
-
+      dto.setProductId( id );
       return dto;
     }).collect(Collectors.toList());
     return dtoList;
@@ -62,8 +57,8 @@ public class ControllerHelper {
    */
   public void setResponseStatus ( CustomerResponse response ) {
 
-    response.setResponseCode("00");
-    response.setResponseMsg("Success");
+    response.setResponseCode( ResponseCode.SUCCESS.getCode() );
+    response.setResponseMsg( "Success" );
   }
 
   /**
@@ -72,7 +67,7 @@ public class ControllerHelper {
    */
   public void setResponseStatus ( CartAmountResponse response ) {
 
-    response.setResponseCode("00");
+    response.setResponseCode( ResponseCode.SUCCESS.getCode() );
     response.setResponseMsg("Success");
   }
 
@@ -82,7 +77,29 @@ public class ControllerHelper {
    */
   public void setResponseStatus ( AddProductsResponse response ) {
 
-    response.setResponseCode("00");
+    response.setResponseCode( ResponseCode.SUCCESS.getCode() );
+    response.setResponseMsg("Success");
+  }
+
+  /**
+   * Get Product Dto by Product Request
+   * @param request Product Request Class
+   * @return ProductDto Dto class
+   */
+  public ProductDto toDto ( ProductRequest request ) {
+
+    ProductDto dto = modelMapper.map( request, ProductDto.class );
+    dto.setProductId( null );
+    return dto;
+  }
+
+  /**
+   * Set Product Response Status
+   * @param response Product Response
+   */
+  public void setResponseStatus ( ProductResponse response ) {
+
+    response.setResponseCode( ResponseCode.SUCCESS.getCode() );
     response.setResponseMsg("Success");
   }
 

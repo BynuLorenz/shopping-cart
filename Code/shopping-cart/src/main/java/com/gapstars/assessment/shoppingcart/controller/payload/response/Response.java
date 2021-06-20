@@ -2,6 +2,7 @@ package com.gapstars.assessment.shoppingcart.controller.payload.response;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.gapstars.assessment.shoppingcart.common.enums.ResponseCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;

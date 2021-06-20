@@ -38,6 +38,9 @@ public class CartEntity extends AuditableEntity {
   @JoinColumn(name = "customer_id", nullable = false)
   private CustomerEntity customer;
 
+  @Column(name="is_cart_updated")
+  private Boolean isCartUpdated;
+
   /** Relationship to map Cart Cart */
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<CartProductEntity> cartProducts;

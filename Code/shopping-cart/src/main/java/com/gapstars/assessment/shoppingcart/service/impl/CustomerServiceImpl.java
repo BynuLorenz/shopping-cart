@@ -3,6 +3,7 @@ package com.gapstars.assessment.shoppingcart.service.impl;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
+import com.gapstars.assessment.shoppingcart.common.property.ShoppingCartProperties;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.AddProductsResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CartAmountResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CustomerResponse;
@@ -18,7 +19,7 @@ import com.gapstars.assessment.shoppingcart.exception.CartNotFoundException;
 import com.gapstars.assessment.shoppingcart.exception.CustomerNotFoundException;
 import com.gapstars.assessment.shoppingcart.exception.ProductNotFoundException;
 import com.gapstars.assessment.shoppingcart.service.CustomerService;
-import com.gapstars.assessment.shoppingcart.service.helper.CustomerServiceHelper;
+import com.gapstars.assessment.shoppingcart.service.helper.ServiceHelper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +44,9 @@ public class CustomerServiceImpl implements CustomerService {
   @Autowired( required = false )
   CartProductRepository cartProductRepository;
   @Autowired( required = false )
-  CustomerServiceHelper helper;
+  ServiceHelper helper;
+  @Autowired( required = false )
+  ShoppingCartProperties properties;
 
 
   /**
@@ -75,14 +78,14 @@ public class CustomerServiceImpl implements CustomerService {
   @Override
   public AddProductsResponse addProductsToCart( List<ProductDto> products, Long customerId ) {
 
-    log.info( "addItemsToCart() : Items to be added to cart - {}" , products );
-    log.info( "addItemsToCart() : Customer id - {}" , customerId );
-    // Check for Customer, else throw exception
+    log.info( "addItemsToCart() : Items to be added to cart - {} customerId - {}" , products );
+
+    // Check for Customer, If not exists throw exception
     Optional< CustomerEntity > customerEntity = customerRepository.findById( customerId );
     log.info( "Is Customer exists ? {} ", customerEntity.isPresent());
     customerEntity.orElseThrow(() -> new CustomerNotFoundException( "Customer not found"+ customerId ));
 
-    // Check for Customer Cart is available, else Create new cart.
+    // Check for Customer Cart is available, if not create new Cart.
     Optional<CartEntity> cartEntity = Optional.ofNullable( customerEntity.get().getCartEntity() );
     if ( cartEntity.isEmpty() ) {
       log.info( "addItemsToCart() : no cart available for Customer and creating. - {}", customerEntity.get().getFirstName() );
@@ -92,7 +95,7 @@ public class CustomerServiceImpl implements CustomerService {
       customerEntity.get().setCartEntity( newCartEntity );
     }
 
-    // Check products list to be added, else throw exception
+    // Check products list size to be added, else throw exception
     if ( products.size() == 0 ) {
       log.info( "addItemsToCart() : No products to be added. Exception is about to throw." );
       throw new ProductNotFoundException ( "No products to add." );
@@ -102,15 +105,27 @@ public class CustomerServiceImpl implements CustomerService {
     Set<CartProductEntity> cartProductEntities = products.stream().map( product -> {
 
       // Check product is available, else throw exception
-      Optional<ProductEntity> productEntity = productRepository.findByProductName( product.getProductName() );
+      Optional<ProductEntity> productEntity = productRepository.findById( product.getProductId() );
       log.info("Is product exists ? {}", productEntity.isPresent());
       productEntity.orElseThrow(() -> new ProductNotFoundException("No such product"));
+
+      // Check product is available. If not throw exception
+      if ( productEntity.get().getProductQuantity().compareTo(BigDecimal.ZERO)  < 0 )
+        throw new ProductNotFoundException("No such product");
+
+      // update product quantity
+      helper.updateProductQuantities( productEntity.get() );
 
       CartProductEntity cartProductEntity = helper.toEntity( productEntity.get(), customerEntity.get() );
       return cartProductEntity;
 
     } ).collect( Collectors.toSet() );
     customerEntity.get().getCartEntity().setCartProducts( cartProductEntities );
+
+    // Check new products are added to the Cart. Then update Cart's amount calculation flag
+    if ( cartProductEntities.size() > 0 )
+      customerEntity.get().getCartEntity().setIsCartUpdated( Boolean.FALSE );
+    // Update Customer Entity
     customerRepository.save( customerEntity.get() );
 
     // setting up response
@@ -135,20 +150,52 @@ public class CustomerServiceImpl implements CustomerService {
     Optional< CartEntity > cartEntity = cartRepository.findById( cartId );
     cartEntity.orElseThrow(() -> new CartNotFoundException( "Cart not found" ));
 
+    // Check Cart is already updated
+    if ( cartEntity.get().getIsCartUpdated() ) {
+      log.info( "calculateCartAmounts() : Cart Id - {} is already updated.", cartId );
+      CartAmountResponse response = helper.toResponse( cartEntity.get() );
+      return response;
+    }
+
     // Calculate total amount
     BigDecimal totalAmount = helper.calculateCartTotalAmount( cartEntity.get() ) ;
     log.info( "calculateCartAmounts() : Total Amount {}", totalAmount );
     // Calculate total vat
     BigDecimal totalVat = helper.calculateTotalVat( cartEntity.get() );
     log.info( "calculateCartAmounts() : Total Vat {}", totalVat );
+    // Calculate shipping amount
+    BigDecimal shippingAmount = properties.getGenericShippingFee();
 
     // update entity
-    helper.updateEntity( cartEntity.get(), totalAmount, totalVat, new BigDecimal("100") );
+    helper.updateEntity( cartEntity.get(), totalAmount, totalVat, shippingAmount );
     cartRepository.save( cartEntity.get() );
 
     // setting up response
     CartAmountResponse response = helper.toResponse( cartEntity.get() );
     log.info( "calculateCartAmounts() : Method executed." );
     return response;
+  }
+
+
+  /**
+   * Get all Customers
+   * @return list of Customers
+   */
+  @Override
+  public List<CustomerResponse> getAllCustomers() {
+
+    log.info( "getAllCustomers() executing.");
+    // Get all Customer Entities
+    List<CustomerEntity> entities = customerRepository.findAll();
+
+    // Convert to Customer Response List
+    List<CustomerResponse> responses = entities.stream().map( customer -> {
+
+      CustomerResponse response = helper.toResponse( customer );
+      return response;
+    } ).collect( Collectors.toList() );
+
+    log.info( "getAllCustomers() executed.");
+    return responses;
   }
 }

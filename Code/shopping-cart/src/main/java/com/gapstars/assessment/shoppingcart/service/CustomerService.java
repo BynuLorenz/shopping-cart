@@ -33,4 +33,10 @@ public interface CustomerService {
    */
   CartAmountResponse calculateCartAmounts ( Long cartId) ;
 
+  /**
+   * Get all Customers
+   * @return List of Customer Responses
+   */
+  List<CustomerResponse> getAllCustomers();
+
 }

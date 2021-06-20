@@ -2,7 +2,7 @@ package com.gapstars.assessment.shoppingcart;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
-import com.gapstars.assessment.shoppingcart.common.enums.ProductName;
+import com.gapstars.assessment.shoppingcart.common.enums.ResponseCode;
 import com.gapstars.assessment.shoppingcart.service.CustomerService;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +27,15 @@ public class ShoppingCartApplication implements CommandLineRunner {
 	public void run(String... args)  {
 
 			// Assessment Task 1
-			//createTwoCustomers();
+			createTwoCustomers();
 			// Assessment Task 2
-			//addProductToFirstCustomer();
+			addProductToFirstCustomer();
 			// Assessment Task 3
-			//calculateFirstCustomerCartAmounts();
+			calculateFirstCustomerCartAmounts();
 			// Assessment Task 4
-			//addProductsToSecondCustomer();
+			addProductsToSecondCustomer();
 			// Assessment Task 5
-			//calculateSecondCustomerCartAmounts();
+			calculateSecondCustomerCartAmounts();
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class ShoppingCartApplication implements CommandLineRunner {
 
 		log.info("Start execution - addProductToFirstCustomer()");
 		ProductDto fereroProduct = new ProductDto();
-		fereroProduct.setProductName( ProductName.FERRERO_ROCHER );
+		fereroProduct.setProductId( 1L );
 
 		List<ProductDto> productDtos = new ArrayList<>();
 		productDtos.add( fereroProduct );
@@ -90,10 +90,10 @@ public class ShoppingCartApplication implements CommandLineRunner {
 
 		log.info("Start execution - addProductsToSecondCustomer()");
 		ProductDto tobleroneProduct = new ProductDto();
-		tobleroneProduct.setProductName( ProductName.TOBLERONE );
+		tobleroneProduct.setProductId( 2L );
 
 		ProductDto kitKatProduct = new ProductDto();
-		kitKatProduct.setProductName( ProductName.KITKAT );
+		kitKatProduct.setProductId( 3L );
 
 		List<ProductDto> productDtos = new ArrayList<>();
 		productDtos.add( tobleroneProduct );

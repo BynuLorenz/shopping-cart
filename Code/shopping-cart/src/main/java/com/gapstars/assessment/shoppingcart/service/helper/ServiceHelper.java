@@ -1,13 +1,16 @@
 package com.gapstars.assessment.shoppingcart.service.helper;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
+import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.AddProductsResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CartAmountResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CustomerResponse;
+import com.gapstars.assessment.shoppingcart.controller.payload.response.ProductResponse;
 import com.gapstars.assessment.shoppingcart.dao.entity.CartEntity;
 import com.gapstars.assessment.shoppingcart.dao.entity.CartProductEntity;
 import com.gapstars.assessment.shoppingcart.dao.entity.CustomerEntity;
 import com.gapstars.assessment.shoppingcart.dao.entity.ProductEntity;
+import com.gapstars.assessment.shoppingcart.dao.entity.ProductTitleEntity;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -19,7 +22,7 @@ import org.springframework.stereotype.Component;
 /** Helper class for Customer Service */
 @Slf4j
 @Component
-public class CustomerServiceHelper {
+public class ServiceHelper {
 
   @Autowired( required = false )
   ModelMapper modelMapper;
@@ -47,8 +50,9 @@ public class CustomerServiceHelper {
 
     CartEntity cartEntity = new CartEntity();
     cartEntity.setCustomer( customerEntity );
-    customerEntity.setCreatedBy( customerEntity.getFirstName() );
-    customerEntity.setCreatedDateTime( LocalDateTime.now() );
+    cartEntity.setIsCartUpdated( Boolean.FALSE );
+    cartEntity.setCreatedBy( customerEntity.getFirstName() );
+    cartEntity.setCreatedDateTime( LocalDateTime.now() );
     return cartEntity;
   }
 
@@ -106,6 +110,7 @@ public class CustomerServiceHelper {
     cartEntity.setTotalAmount( totalAmount );
     cartEntity.setTotalVat( totalVat );
     cartEntity.setShipmentCost( totalShipping );
+    cartEntity.setIsCartUpdated( Boolean.TRUE );
     cartEntity.setModifiedDateTime( LocalDateTime.now() );
     cartEntity.setModifiedBy( "SYSTEM" );
     return cartEntity;
@@ -151,6 +156,48 @@ public class CustomerServiceHelper {
     AddProductsResponse response = new AddProductsResponse();
     response.setCustomerId( customerId );
     response.setCartId( cartId );
+    return response;
+  }
+
+  /**
+   * update product quantity after purchase
+   * @param productEntity Entity class
+   */
+  public void updateProductQuantities ( ProductEntity productEntity ) {
+
+    BigDecimal quantity = productEntity.getProductQuantity();
+    productEntity.setProductQuantity( quantity.subtract(BigDecimal.ONE) );
+    productEntity.setModifiedBy("SYSTEM");
+    productEntity.setModifiedDateTime( LocalDateTime.now() );
+
+  }
+
+  /**
+   * Generate Product Entity by Product dto
+   * @param dto Product Dto
+   * @return ProductEntity
+   */
+  public ProductEntity toEntity ( ProductDto dto, ProductTitleEntity titleEntity ) {
+
+    ProductEntity entity = modelMapper.map( dto, ProductEntity.class );
+    entity.setProductName(  entity.getProductName().toUpperCase() );
+    entity.setProductTitle( titleEntity );
+    entity.setCreatedBy( "SYSTEM" );
+    entity.setCreatedDateTime( LocalDateTime.now() );
+    return entity;
+  }
+
+  /**
+   * Generate Product Response from Product Entity
+   * @param productEntity Entity Class
+   * @return ProductResponse Response Class
+   */
+  public ProductResponse toResponse ( ProductEntity productEntity ) {
+
+    ProductResponse response = modelMapper.map( productEntity, ProductResponse.class );
+    response.setProductTitle( productEntity.getProductTitle().getProductTitleName() );
+    response.setProductTitleId( productEntity.getProductTitle().getId() );
+    response.setProductId( productEntity.getId() );
     return response;
   }
 
