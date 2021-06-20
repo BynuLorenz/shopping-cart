@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS `cart` (
   `cart_total_amount` decimal(19,2) DEFAULT NULL,
   `cart_total_vat` decimal(19,2) DEFAULT NULL,
   `customer_id` bigint(20) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
+  `is_cart_updated` tinyint(2) DEFAULT '0',
+  `created_by` varchar(50) DEFAULT NULL,
   `created_date_time` datetime DEFAULT NULL,
   `modified_by` varchar(50) DEFAULT NULL,
   `modified_date_time` datetime DEFAULT NULL,
@@ -73,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `customer` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table shopping_cart.customer: ~0 rows (approximately)
+-- Dumping data for table shopping_cart.customer: ~1 rows (approximately)
 /*!40000 ALTER TABLE `customer` DISABLE KEYS */;
 /*!40000 ALTER TABLE `customer` ENABLE KEYS */;
 
