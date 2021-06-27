@@ -22,11 +22,7 @@ USE `shopping_cart`;
 DROP TABLE IF EXISTS `cart`;
 CREATE TABLE IF NOT EXISTS `cart` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cart_shipment_cost` decimal(19,2) DEFAULT NULL,
-  `cart_total_amount` decimal(19,2) DEFAULT NULL,
-  `cart_total_vat` decimal(19,2) DEFAULT NULL,
   `customer_id` bigint(20) NOT NULL,
-  `is_cart_updated` tinyint(2) DEFAULT '0',
   `created_by` varchar(50) DEFAULT NULL,
   `created_date_time` datetime DEFAULT NULL,
   `modified_by` varchar(50) DEFAULT NULL,
@@ -36,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `cart` (
   CONSTRAINT `fk_customer_id_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table shopping_cart.cart: ~0 rows (approximately)
+-- Dumping data for table shopping_cart.cart: ~2 rows (approximately)
 /*!40000 ALTER TABLE `cart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `cart` ENABLE KEYS */;
 
@@ -46,6 +42,9 @@ CREATE TABLE IF NOT EXISTS `cart_products` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `cart_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
+  `product_price` decimal(10,2) DEFAULT '0.00',
+  `product_vat` decimal(10,2) DEFAULT '0.00',
+  `product_shipping_fee` decimal(10,2) DEFAULT '0.00',
   `created_by` varchar(50) DEFAULT NULL,
   `created_date_time` datetime DEFAULT NULL,
   `modified_by` varchar(50) DEFAULT NULL,
@@ -57,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `cart_products` (
   CONSTRAINT `fk_product_id_product_id` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table shopping_cart.cart_products: ~0 rows (approximately)
+-- Dumping data for table shopping_cart.cart_products: ~3 rows (approximately)
 /*!40000 ALTER TABLE `cart_products` DISABLE KEYS */;
 /*!40000 ALTER TABLE `cart_products` ENABLE KEYS */;
 
@@ -74,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `customer` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table shopping_cart.customer: ~1 rows (approximately)
+-- Dumping data for table shopping_cart.customer: ~2 rows (approximately)
 /*!40000 ALTER TABLE `customer` DISABLE KEYS */;
 /*!40000 ALTER TABLE `customer` ENABLE KEYS */;
 
@@ -94,15 +93,19 @@ CREATE TABLE IF NOT EXISTS `product` (
   PRIMARY KEY (`id`),
   KEY `fk_product_title_product_title_id` (`product_title`),
   CONSTRAINT `fk_product_title_product_title_id` FOREIGN KEY (`product_title`) REFERENCES `product_title` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
--- Dumping data for table shopping_cart.product: ~4 rows (approximately)
+-- Dumping data for table shopping_cart.product: ~7 rows (approximately)
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
 INSERT INTO `product` (`id`, `product_price`, `product_name`, `product_title`, `product_tax`, `product_quantity`, `created_by`, `created_date_time`, `modified_by`, `modified_date_time`) VALUES
-	(1, 100.50, 'KITKAT', 1, 1.55, 98.00, 'SYSTEM', '2021-06-20 01:57:52', NULL, NULL),
-	(2, 150.55, 'OREO', 2, 1.35, 98.00, 'SYSTEM', '2021-06-20 04:36:08', NULL, NULL),
-	(3, 300.50, 'ANCHOR', 2, 1.55, 98.00, 'SYSTEM', '2021-06-20 01:57:52', NULL, NULL),
-	(4, 150.55, 'MILO', 2, 1.35, 100.00, 'SYSTEM', '2021-06-20 04:39:52', NULL, NULL);
+	(1, 100.50, 'KITKAT', 1, 1.55, 100.00, 'SYSTEM', '2021-06-20 01:57:52', 'SYSTEM', '2021-06-27 18:01:12'),
+	(2, 150.55, 'OREO', 2, 1.35, 100.00, 'SYSTEM', '2021-06-20 04:36:08', 'SYSTEM', '2021-06-27 18:01:12'),
+	(3, 300.50, 'ANCHOR', 2, 1.55, 100.00, 'SYSTEM', '2021-06-20 01:57:52', 'SYSTEM', '2021-06-27 17:59:53'),
+	(4, 150.55, 'MILO', 2, 1.35, 100.00, 'SYSTEM', '2021-06-20 04:39:52', 'SYSTEM', '2021-06-26 15:49:08'),
+	(5, 125.36, 'BURBON', 2, 1.55, 100.00, 'SYSTEM', '2021-06-20 10:12:02', 'SYSTEM', '2021-06-26 15:49:08'),
+	(6, 75.00, 'KANDOS', 1, 1.33, 100.00, 'SYSTEM', '2021-06-20 11:01:34', 'SYSTEM', '2021-06-26 13:57:49'),
+	(7, 100.00, 'CREAMY', 2, 3.20, 100.00, 'SYSTEM', '2021-06-27 02:29:52', NULL, NULL),
+	(8, 125.00, 'NEWDALE', 2, 1.20, 100.00, 'SYSTEM', '2021-06-27 18:03:11', NULL, NULL);
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 
 -- Dumping structure for table shopping_cart.product_title
