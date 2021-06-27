@@ -10,18 +10,21 @@ import lombok.Setter;
 /** Response class for Customer related returns */
 @Getter
 @Setter
-@JsonInclude(Include.NON_NULL)
 public class CustomerResponse extends Response {
 
-  /** property related to customer first name */
+  /** Related to customer first name */
   @JsonProperty("firstName")
   private String firstName ;
 
-  /** property related to customer last name */
+  /** Related to customer last name */
   @JsonProperty("lastName")
   private String lastName ;
 
-  /** property related to customer id in the system */
+  /** Related to customer last name */
+  @JsonProperty("cartId")
+  private Long cartId ;
+
+  /** util related to customer id in the system */
   @JsonProperty("id")
   private long id;
 

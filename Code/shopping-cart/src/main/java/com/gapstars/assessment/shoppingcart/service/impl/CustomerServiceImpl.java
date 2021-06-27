@@ -3,7 +3,6 @@ package com.gapstars.assessment.shoppingcart.service.impl;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
-import com.gapstars.assessment.shoppingcart.common.property.ShoppingCartProperties;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.AddProductsResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CartAmountResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CustomerResponse;
@@ -45,8 +44,6 @@ public class CustomerServiceImpl implements CustomerService {
   CartProductRepository cartProductRepository;
   @Autowired( required = false )
   ServiceHelper helper;
-  @Autowired( required = false )
-  ShoppingCartProperties properties;
 
 
   /**
@@ -122,9 +119,6 @@ public class CustomerServiceImpl implements CustomerService {
     } ).collect( Collectors.toSet() );
     customerEntity.get().getCartEntity().setCartProducts( cartProductEntities );
 
-    // Check new products are added to the Cart. Then update Cart's amount calculation flag
-    if ( cartProductEntities.size() > 0 )
-      customerEntity.get().getCartEntity().setIsCartUpdated( Boolean.FALSE );
     // Update Customer Entity
     customerRepository.save( customerEntity.get() );
 
@@ -139,39 +133,29 @@ public class CustomerServiceImpl implements CustomerService {
   /**
    * Calculate Cart Amounts
    * @param cartId Cart Id
-   * @return
+   * @return Total Amount Response
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @Override
-  public CartAmountResponse calculateCartAmounts(Long cartId) {
+  public CartAmountResponse getCartAmounts(Long cartId) {
 
     log.info( "calculateCartAmounts() : Cart Id - {}", cartId );
     // Check Customer else throw exception
     Optional< CartEntity > cartEntity = cartRepository.findById( cartId );
     cartEntity.orElseThrow(() -> new CartNotFoundException( "Cart not found" ));
 
-    // Check Cart is already updated
-    if ( cartEntity.get().getIsCartUpdated() ) {
-      log.info( "calculateCartAmounts() : Cart Id - {} is already updated.", cartId );
-      CartAmountResponse response = helper.toResponse( cartEntity.get() );
-      return response;
-    }
-
     // Calculate total amount
-    BigDecimal totalAmount = helper.calculateCartTotalAmount( cartEntity.get() ) ;
+    BigDecimal totalAmount = helper.calculateCartTotalAmounts( cartEntity.get() ) ;
     log.info( "calculateCartAmounts() : Total Amount {}", totalAmount );
     // Calculate total vat
     BigDecimal totalVat = helper.calculateTotalVat( cartEntity.get() );
     log.info( "calculateCartAmounts() : Total Vat {}", totalVat );
     // Calculate shipping amount
-    BigDecimal shippingAmount = properties.getGenericShippingFee();
-
-    // update entity
-    helper.updateEntity( cartEntity.get(), totalAmount, totalVat, shippingAmount );
-    cartRepository.save( cartEntity.get() );
+    BigDecimal totalShippingFee = helper.calculateCartTotalShippingFee( cartEntity.get() );
+    log.info( "calculateCartAmounts() : Total Shipping Fee {}", totalShippingFee );
 
     // setting up response
-    CartAmountResponse response = helper.toResponse( cartEntity.get() );
+    CartAmountResponse response = helper.toResponse( cartEntity.get().getId(), totalShippingFee, totalAmount, totalVat );
     log.info( "calculateCartAmounts() : Method executed." );
     return response;
   }
@@ -189,12 +173,7 @@ public class CustomerServiceImpl implements CustomerService {
     List<CustomerEntity> entities = customerRepository.findAll();
 
     // Convert to Customer Response List
-    List<CustomerResponse> responses = entities.stream().map( customer -> {
-
-      CustomerResponse response = helper.toResponse( customer );
-      return response;
-    } ).collect( Collectors.toList() );
-
+    List<CustomerResponse> responses = helper.toResponse( entities );
     log.info( "getAllCustomers() executed.");
     return responses;
   }

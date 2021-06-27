@@ -27,13 +27,13 @@ public class ProductRequest extends BaseRequest {
 
   /** property related to tax */
   @NotNull(message = "Tax can not be empty")
-  @Min(1)
+  @Min(value = 1, message = "Tax should be greater than 1.")
   @JsonProperty( "tax" )
   private BigDecimal tax;
 
   /** property related to product quantity */
   @NotNull(message = "Quantity can not be empty")
-  @Min(100)
+  @Min(value = 100, message = "Quantity should be greater than 100.")
   @JsonProperty( "productQuantity" )
   private BigDecimal productQuantity;
 

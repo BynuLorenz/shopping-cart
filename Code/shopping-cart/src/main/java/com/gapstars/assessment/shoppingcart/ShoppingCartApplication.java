@@ -2,7 +2,6 @@ package com.gapstars.assessment.shoppingcart;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
-import com.gapstars.assessment.shoppingcart.common.enums.ResponseCode;
 import com.gapstars.assessment.shoppingcart.service.CustomerService;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,17 +43,11 @@ public class ShoppingCartApplication implements CommandLineRunner {
 	void createTwoCustomers () {
 
 		log.info( "Start execution - createTwoCustomers()" );
-
-		CustomerDto customerDto = new CustomerDto();
-		customerDto.setFirstName( "John W." );
-		customerDto.setLastName( "Smith" );
+		CustomerDto customerDto = new CustomerDto( "John W.", "Smith"  );
 		customerService.createCustomer( customerDto );
 
-		customerDto = new CustomerDto();
-		customerDto.setFirstName( "Will" );
-		customerDto.setLastName( "Graham" );
+		customerDto = new CustomerDto( "Will","Graham"  );
 		customerService.createCustomer( customerDto );
-
 		log.info( "Execution of createTwoCustomers() successfully completed." );
 	}
 
@@ -64,8 +57,7 @@ public class ShoppingCartApplication implements CommandLineRunner {
 	void addProductToFirstCustomer () {
 
 		log.info("Start execution - addProductToFirstCustomer()");
-		ProductDto fereroProduct = new ProductDto();
-		fereroProduct.setProductId( 1L );
+		ProductDto fereroProduct = new ProductDto( 1L );
 
 		List<ProductDto> productDtos = new ArrayList<>();
 		productDtos.add( fereroProduct );
@@ -79,7 +71,7 @@ public class ShoppingCartApplication implements CommandLineRunner {
 	void calculateFirstCustomerCartAmounts () {
 
 		log.info( "Start execution - calculateFirstCustomerCartAmounts()" );
-		customerService.calculateCartAmounts(1L);
+		customerService.getCartAmounts(1L);
 		log.info( "Execution of calculateFirstCustomerCartAmounts() successfully completed." );
 	}
 
@@ -89,11 +81,8 @@ public class ShoppingCartApplication implements CommandLineRunner {
 	void addProductsToSecondCustomer () {
 
 		log.info("Start execution - addProductsToSecondCustomer()");
-		ProductDto tobleroneProduct = new ProductDto();
-		tobleroneProduct.setProductId( 2L );
-
-		ProductDto kitKatProduct = new ProductDto();
-		kitKatProduct.setProductId( 3L );
+		ProductDto tobleroneProduct = new ProductDto( 2L );
+		ProductDto kitKatProduct = new ProductDto( 3L );
 
 		List<ProductDto> productDtos = new ArrayList<>();
 		productDtos.add( tobleroneProduct );
@@ -112,7 +101,7 @@ public class ShoppingCartApplication implements CommandLineRunner {
 	void calculateSecondCustomerCartAmounts () {
 
 		log.info( "Start execution - calculateSecondCustomerCartAmounts()" );
-		customerService.calculateCartAmounts( 2L );
+		customerService.getCartAmounts( 2L );
 		log.info( "Execution of calculateSecondCustomerCartAmounts() successfully completed." );
 
 	}

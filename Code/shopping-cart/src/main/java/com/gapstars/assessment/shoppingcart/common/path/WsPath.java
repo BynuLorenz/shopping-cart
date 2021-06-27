@@ -12,8 +12,8 @@ public interface WsPath {
     String PRODUCT =  "/product";
 
     /** WS Path for add customer products */
-    String ADD_PRODUCTS = "/add/products";
+    String PRODUCTS = "/products";
 
     /** WS Path for add customer products */
-    String UPDATE_AMOUNTS = "/update/cart";
+    String CART = "/cart";
 }

@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 public abstract class GeneratedIdEntity {
 
-    /** property related to auto generated id in all entities */
+    /** Property related to auto generated id in all entities */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

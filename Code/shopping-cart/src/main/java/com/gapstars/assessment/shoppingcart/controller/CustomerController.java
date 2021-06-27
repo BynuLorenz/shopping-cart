@@ -14,15 +14,14 @@ import com.gapstars.assessment.shoppingcart.controller.payload.response.Response
 import com.gapstars.assessment.shoppingcart.service.CustomerService;
 import java.util.List;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Controller for Customer related functions */
@@ -72,7 +71,7 @@ public class CustomerController {
    * @param request Request Class
    * @return CustomerResponse Response Class
    */
-  @PostMapping(WsPath.ADD_PRODUCTS)
+  @PostMapping(WsPath.PRODUCTS)
   public AddProductsResponse addProductsToCart( @Valid @RequestBody AddProductsRequest request ) {
 
     log.info( "Received addProductsToCart() request. Request : {}", request);
@@ -89,11 +88,11 @@ public class CustomerController {
    * @param cartId Cart Id
    * @return CartAmountResponse
    */
-  @PatchMapping(WsPath.UPDATE_AMOUNTS)
-  public Response updateCartAmounts( @Valid @RequestBody @NotNull Long cartId ) {
+  @GetMapping(WsPath.CART)
+  public CartAmountResponse getCartAmounts( @Valid @NotNull @RequestParam("cartId") Long cartId) {
 
     log.info( "Received updateCartAmounts() request. Id : {}", cartId);
-    CartAmountResponse response = customerService.calculateCartAmounts( cartId );
+    CartAmountResponse response = customerService.getCartAmounts( cartId );
     helper.setResponseStatus( response );
     log.info( "Executed updateCartAmounts() request. Response : {}", response);
     return response ;

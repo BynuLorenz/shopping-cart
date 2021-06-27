@@ -24,19 +24,19 @@ import lombok.Setter;
     uniqueConstraints = {@UniqueConstraint(columnNames = {"product_name", "product_title"})})
 public class ProductEntity extends AuditableEntity {
 
-  /** property related to product name */
+  /** Property related to product name */
   @Column(name="product_name")
   private String productName;
 
-  /** property related to product price */
+  /** Property related to product price */
   @Column(name="product_price")
   private BigDecimal price;
 
-  /** property related to product tax */
+  /** Property related to product tax */
   @Column(name="product_tax")
   private BigDecimal tax;
 
-  /** property related to product quantity */
+  /** Property related to product quantity */
   @Column(name="product_quantity")
   private BigDecimal productQuantity;
 

@@ -10,11 +10,11 @@ import lombok.Setter;
 @Setter
 public class AddProductsResponse extends Response {
 
-  /** property related to Customer Id */
+  /** util related to Customer Id */
   @JsonProperty("customerId")
   private Long customerId ;
 
-  /** property related to Cart Id */
+  /** util related to Cart Id */
   @JsonProperty("cartId")
   private Long cartId ;
 

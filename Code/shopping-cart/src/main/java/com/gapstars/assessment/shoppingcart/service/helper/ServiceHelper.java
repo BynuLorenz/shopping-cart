@@ -2,6 +2,7 @@ package com.gapstars.assessment.shoppingcart.service.helper;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
+import com.gapstars.assessment.shoppingcart.common.util.ShoppingCartProperties;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.AddProductsResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CartAmountResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CustomerResponse;
@@ -14,6 +15,9 @@ import com.gapstars.assessment.shoppingcart.dao.entity.ProductTitleEntity;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,8 @@ public class ServiceHelper {
 
   @Autowired( required = false )
   ModelMapper modelMapper;
+  @Autowired( required = false )
+  ShoppingCartProperties properties;
 
 
   /**
@@ -50,7 +56,6 @@ public class ServiceHelper {
 
     CartEntity cartEntity = new CartEntity();
     cartEntity.setCustomer( customerEntity );
-    cartEntity.setIsCartUpdated( Boolean.FALSE );
     cartEntity.setCreatedBy( customerEntity.getFirstName() );
     cartEntity.setCreatedDateTime( LocalDateTime.now() );
     return cartEntity;
@@ -67,6 +72,9 @@ public class ServiceHelper {
     CartProductEntity cartProductEntity = new CartProductEntity();
     cartProductEntity.setProduct( productEntity );
     cartProductEntity.setCart( customerEntity.getCartEntity() );
+    cartProductEntity.setPrice( calculateCartProductAmount( productEntity ) );
+    cartProductEntity.setVat( calculateProductVat( productEntity ) );
+    cartProductEntity.setShippingFee( calculateProductShippingFee() );
     cartProductEntity.setCreatedDateTime( LocalDateTime.now() );
     cartProductEntity.setCreatedBy( customerEntity.getFirstName() );
     return cartProductEntity;
@@ -77,9 +85,9 @@ public class ServiceHelper {
    * @param cartEntity Cart Entity
    * @return Total Amount
    */
-  public BigDecimal calculateCartTotalAmount ( CartEntity cartEntity ) {
+  public BigDecimal calculateCartTotalAmounts ( CartEntity cartEntity ) {
 
-    return cartEntity.getCartProducts().stream().map( p -> p.getProduct().getPrice() )
+    return cartEntity.getCartProducts().stream().map( p -> p.getPrice() )
         .reduce( BigDecimal.ZERO, ( b1 ,  b2 ) -> b1.add( b2 ));
   }
 
@@ -92,25 +100,17 @@ public class ServiceHelper {
    */
   public BigDecimal calculateTotalVat ( CartEntity cartEntity ) {
 
-    return cartEntity.getCartProducts().stream().
-        map( n -> ( n.getProduct().getPrice().multiply( n.getProduct().getTax() ).divide( BigDecimal.valueOf(100) ))
-            .setScale(2, RoundingMode.HALF_EVEN )).reduce( BigDecimal.ZERO, ( b1, b2 ) -> b1.add( b2 ));
+    return cartEntity.getCartProducts().stream().map( p -> p.getVat() )
+        .reduce( BigDecimal.ZERO, ( b1 ,  b2 ) -> b1.add( b2 ));
   }
 
   /**
    * Set up updated Cart Entity
    * @param cartEntity Original Cart Entoty
-   * @param totalAmount Total Amount
-   * @param totalVat Total Vat
-   * @param totalShipping Total Shipping Amount
    * @return CartEntity updated Cart Entity
    */
-  public CartEntity updateEntity ( CartEntity cartEntity, BigDecimal totalAmount, BigDecimal totalVat, BigDecimal totalShipping ) {
+  public CartEntity updateEntity ( CartEntity cartEntity ) {
 
-    cartEntity.setTotalAmount( totalAmount );
-    cartEntity.setTotalVat( totalVat );
-    cartEntity.setShipmentCost( totalShipping );
-    cartEntity.setIsCartUpdated( Boolean.TRUE );
     cartEntity.setModifiedDateTime( LocalDateTime.now() );
     cartEntity.setModifiedBy( "SYSTEM" );
     return cartEntity;
@@ -132,16 +132,20 @@ public class ServiceHelper {
 
   /**
    * Generate Cart Amount Response from Cart Entity
-   * @param cartEntity Entity Class
+   * @param cartId Cart Id
+   * @param shippingAmount Total Shipping Amount
+   * @param totalCartAmount Total Cart Amount
+   * @param totalVal Total Vat Amount
    * @return Cart Amount Response
    */
-  public CartAmountResponse toResponse ( CartEntity cartEntity ) {
+  public CartAmountResponse toResponse ( Long cartId, BigDecimal shippingAmount, BigDecimal totalCartAmount, BigDecimal totalVal ) {
 
     CartAmountResponse cartAmountResponse = new CartAmountResponse();
-    cartAmountResponse.setShippingAmount( cartEntity.getShipmentCost() );
-    cartAmountResponse.setTotalCartAmount( cartEntity.getTotalAmount() );
-    cartAmountResponse.setTotaVatAmount( cartEntity.getTotalVat() );
-    cartAmountResponse.setCartId( cartEntity.getId() );
+    cartAmountResponse.setShippingAmount( shippingAmount );
+    cartAmountResponse.setTotalCartAmount( totalCartAmount );
+    cartAmountResponse.setTotaVatAmount( totalVal );
+    cartAmountResponse.setCartId( cartId );
+    cartAmountResponse.setTotalToBeSettled( shippingAmount.add( totalCartAmount ).add( totalVal ) );
     return cartAmountResponse;
   }
 
@@ -199,6 +203,93 @@ public class ServiceHelper {
     response.setProductTitleId( productEntity.getProductTitle().getId() );
     response.setProductId( productEntity.getId() );
     return response;
+  }
+
+  /**
+   * Calculate the price of a specific product
+   * @param entity Product Entity
+   * @return Product Price
+   */
+  public BigDecimal calculateCartProductAmount ( ProductEntity entity ) {
+
+    return entity.getPrice();
+  }
+
+  /**
+   * Calculate VAT of a specific product.
+   * Multiplies VAT percentage into Product Price
+   * @param entity Product Entity
+   * @return Product VAT
+   */
+  public BigDecimal calculateProductVat ( ProductEntity entity ) {
+
+    BigDecimal productTax = entity.getPrice().multiply( entity.getTax() ).divide( BigDecimal.valueOf(100) );
+    productTax.setScale(2, RoundingMode.HALF_EVEN);
+    return productTax;
+  }
+
+  /**
+   * Calculate product shipping fee
+   * @return Shipping Fee
+   */
+  public BigDecimal calculateProductShippingFee () {
+
+    return properties.getGenericShippingFeePerProduct();
+  }
+
+  /**
+   * Calculate total shipping fee
+   * Add all sipping fees into together
+   * @param cartEntity Cart Entity
+   * @return Total Shipping Fee
+   */
+  public BigDecimal calculateCartTotalShippingFee ( CartEntity cartEntity ) {
+
+    return cartEntity.getCartProducts().stream().map( p -> p.getShippingFee() )
+        .reduce( BigDecimal.ZERO, ( b1 ,  b2 ) -> b1.add( b2 ));
+  }
+
+  /**
+   * Create get all customers response
+   * @param entities Customer Entities
+   * @return List of all Customers
+   */
+  public List<CustomerResponse> toResponse ( List<CustomerEntity> entities ) {
+
+    List<CustomerResponse> responses = entities.stream().map( customer -> {
+
+      CustomerResponse customerResponse = new CustomerResponse();
+      customerResponse.setFirstName( customer.getFirstName() );
+      customerResponse.setLastName( customer.getLastName() );
+      customerResponse.setId( customer.getId() );
+      // If only Customer has a Cart, fetch the Cart Id
+      Optional<CartEntity> cartEntity = Optional.ofNullable( customer.getCartEntity() );
+      if ( cartEntity.isPresent() ) customerResponse.setCartId( customer.getCartEntity().getId() );
+
+      return customerResponse;
+    } ).collect( Collectors.toList() );
+
+    return responses;
+  }
+
+
+  /**
+   * Create get all products list response
+   * @param entities List of Product Entities
+   * @return List of Product Response Entities
+   */
+  public List<ProductResponse> toListResponse ( List<ProductEntity> entities ) {
+
+    List<ProductResponse> productResponses = entities.stream().map( product -> {
+
+      ProductResponse response = modelMapper.map( product, ProductResponse.class );
+      response.setProductTitle( product.getProductTitle().getProductTitleName() );
+      response.setProductTitleId( product.getProductTitle().getId() );
+      response.setProductId( product.getId() );
+      return response;
+
+    } ).collect( Collectors.toList() );
+    return productResponses;
   }
 
 

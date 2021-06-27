@@ -18,11 +18,11 @@ import lombok.Setter;
 @Table(name = "customer")
 public class CustomerEntity extends AuditableEntity {
 
-  /** property related to customer name */
+  /** Property related to customer name */
   @Column(name="customer_first_name")
   private String firstName;
 
-  /** property related to customer last name */
+  /** Property related to customer last name */
   @Column(name="customer_last_name")
   private String lastName;
 

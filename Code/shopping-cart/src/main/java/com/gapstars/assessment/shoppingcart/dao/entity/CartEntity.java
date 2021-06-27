@@ -21,25 +21,10 @@ import lombok.Setter;
 @Table(name = "cart")
 public class CartEntity extends AuditableEntity {
 
-  /** property related to cart total amount */
-  @Column(name="cart_total_amount")
-  private BigDecimal totalAmount;
-
-  /** property related to cart total vat */
-  @Column(name="cart_total_vat")
-  private BigDecimal totalVat;
-
-  /** property related to cart shipment cost */
-  @Column(name="cart_shipment_cost")
-  private BigDecimal shipmentCost;
-
-  /** property and relationship related to customer */
+  /** Property and relationship related to customer */
   @OneToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "customer_id", nullable = false)
   private CustomerEntity customer;
-
-  @Column(name="is_cart_updated")
-  private Boolean isCartUpdated;
 
   /** Relationship to map Cart Cart */
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

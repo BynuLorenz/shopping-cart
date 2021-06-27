@@ -69,12 +69,8 @@ public class ProductServiceImpl implements ProductService {
     List<ProductEntity> allProducts = productRepository.findAll();
 
     // Convert to Response List
-    List<ProductResponse> productDtos = allProducts.stream().map( product -> {
-      ProductResponse response = helper.toResponse( product );
-      return response;
-    } ).collect( Collectors.toList() );
-
+    List<ProductResponse> productResponses = helper.toListResponse( allProducts );
     log.info( "getAllProducts() : Method executed." );
-    return productDtos;
+    return productResponses;
   }
 }

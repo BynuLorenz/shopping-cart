@@ -10,19 +10,23 @@ import lombok.Setter;
 @Setter
 public class CartAmountResponse extends Response {
 
-  /** property related to Total Cart Amount */
+  /** util related to Total Cart Amount */
   @JsonProperty("totalCartAmount")
   private BigDecimal totalCartAmount ;
 
-  /** property related to Total VAT Amount */
+  /** util related to Total VAT Amount */
   @JsonProperty("totaVatAmount")
   private BigDecimal totaVatAmount ;
 
-  /** property related to Total Shipping Amount */
+  /** util related to Total Shipping Amount */
   @JsonProperty("shippingAmount")
   private BigDecimal shippingAmount ;
 
-  /** property related to Cart Id */
+  /** util related to total to be settled */
+  @JsonProperty("totalToBeSettled")
+  private BigDecimal totalToBeSettled ;
+
+  /** util related to Cart Id */
   @JsonProperty("cartId")
   private Long cartId ;
 

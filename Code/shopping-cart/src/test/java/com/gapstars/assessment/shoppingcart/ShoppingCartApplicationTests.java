@@ -2,7 +2,7 @@ package com.gapstars.assessment.shoppingcart;
 
 import com.gapstars.assessment.shoppingcart.common.dto.CustomerDto;
 import com.gapstars.assessment.shoppingcart.common.dto.ProductDto;
-import com.gapstars.assessment.shoppingcart.common.property.ShoppingCartProperties;
+import com.gapstars.assessment.shoppingcart.common.util.ShoppingCartProperties;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.AddProductsResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CartAmountResponse;
 import com.gapstars.assessment.shoppingcart.controller.payload.response.CustomerResponse;
@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,20 +109,20 @@ class ShoppingCartApplicationTests {
 	@Test
 	void checkCartAmounts () {
 
-		CartAmountResponse response = customerService.calculateCartAmounts(2L);
+		CartAmountResponse response = customerService.getCartAmounts(2L);
 		//assertEquals(response.getTotalCartAmount(), new BigDecimal(1353.15));
 		assertEquals(response.getShippingAmount(), new BigDecimal(100));
 	}
 
 	@Test
 	void checkPropertyFile () {
-		assertEquals( properties.getGenericShippingFee(), new BigDecimal( 100 ) );
+		assertEquals( properties.getGenericShippingFeePerProduct(), new BigDecimal( 100 ) );
 	}
 
 	@Test
 	void calculateCartAmounts () {
 
-		CartAmountResponse response = customerService.calculateCartAmounts( 2L );
+		CartAmountResponse response = customerService.getCartAmounts( 2L );
 		Assertions.assertThat( response.getTotalCartAmount() != BigDecimal.ZERO );
 	}
 

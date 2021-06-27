@@ -14,7 +14,7 @@ import lombok.Setter;
 @Table(name = "product_title")
 public class ProductTitleEntity extends AuditableEntity {
 
-  /** property related to product price */
+  /** Property related to product price */
   @Column(name="product_title_name", unique = true)
   private String  productTitleName;
 

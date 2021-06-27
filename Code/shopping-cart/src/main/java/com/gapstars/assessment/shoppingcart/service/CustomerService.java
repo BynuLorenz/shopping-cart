@@ -31,7 +31,7 @@ public interface CustomerService {
    * @param cartId Cart Id
    * @return
    */
-  CartAmountResponse calculateCartAmounts ( Long cartId) ;
+  CartAmountResponse getCartAmounts( Long cartId) ;
 
   /**
    * Get all Customers
