@@ -104,5 +104,5 @@ public class ShoppingCartApplication implements CommandLineRunner {
 		customerService.getCartAmounts( 2L );
 		log.info( "Execution of calculateSecondCustomerCartAmounts() successfully completed." );
 
-	}
+	} // Test
 }
