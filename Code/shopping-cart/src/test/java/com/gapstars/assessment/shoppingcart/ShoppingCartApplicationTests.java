@@ -157,4 +157,21 @@ class ShoppingCartApplicationTests {
 		assertNotNull( response.getProductId() );
 	}
 
+	@Test
+	void addUsers () {
+
+		Optional<ProductEntity> productEntity = productRepository.findByProductName( "OREO" );
+		assertNotNull( productEntity );
+
+		ProductDto dto = new ProductDto();
+		dto.setPrice( new BigDecimal( 100.00) );
+		dto.setProductName( "Creamy" );
+		dto.setProductTitle( productEntity.get().getProductTitle().getId() );
+		dto.setProductQuantity( new BigDecimal( 500 ) );
+		dto.setTax( new BigDecimal( 3.2 ) );
+
+		ProductResponse response = productService.createProduct( dto  );
+		assertNotNull( response.getProductId() );
+	}
+
 }
